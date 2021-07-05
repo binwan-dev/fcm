@@ -1,0 +1,138 @@
+* Api
+** Group
+*** Create
+#+BEGIN_SRC restclient
+  POST http://localhost:8080/group/create
+  Content-Type: application/json
+
+  {
+	  "Name": "fcm"
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC js
+// POST http://localhost:8080/group/create
+// HTTP/1.1 200 OK
+// Date: Mon, 05 Jul 2021 17:53:05 GMT
+// Content-Length: 0
+// Request duration: 0.385575s
+#+END_SRC
+
+
+** App
+*** Create
+#+BEGIN_SRC restclient
+  POST http://localhost:8080/app/create
+  Content-Type: application/json
+
+  {
+      "GroupId": 1,
+      "Name": "fcm.test"
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC js
+// POST http://localhost:8080/app/create
+// HTTP/1.1 200 OK
+// Date: Mon, 05 Jul 2021 17:57:57 GMT
+// Content-Length: 0
+// Request duration: 0.469908s
+#+END_SRC
+*** Namespace
+**** Create
+#+BEGIN_SRC restclient
+  POST http://localhost:8080/app/namespace/create
+  Content-Type: application/json
+
+  {
+      "GroupId": 1,
+      "AppId": 1,
+      "Name": "fcm.test+default",
+      "Role": 1
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC js
+// POST http://localhost:8080/app/namespace/create
+// HTTP/1.1 200 OK
+// Date: Mon, 05 Jul 2021 18:00:15 GMT
+// Content-Length: 0
+// Request duration: 0.364938s
+#+END_SRC
+     
+
+*** Config
+**** Create
+#+BEGIN_SRC restclient
+  POST http://localhost:8080/app/config/create
+  Content-Type: application/json
+
+  {
+      "NamespaceId": 7,
+      "Name": "AppOptions:Name",
+      "Data": "FCM",
+      "ValidType": 1
+  }
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC text
+record existed!
+POST http://localhost:8080/app/config/create
+HTTP/1.1 500 Internal Server Error
+Content-Type: text/plain; charset=utf-8
+Date: Mon, 05 Jul 2021 18:05:32 GMT
+Content-Length: 15
+Request duration: 0.069288s
+#+END_SRC
+
+
+** Client
+*** GetConfig
+#+BEGIN_SRC restclient
+  GET http://localhost:8080/client/config?appname=fcm.test
+#+END_SRC
+
+#+RESULTS:
+#+BEGIN_SRC js
+{
+  "App": {
+    "Id": 2,
+    "GroupId": 7,
+    "Name": "fcm.test",
+    "CreateAt": 1625507877,
+    "Namespaces": [
+      {
+        "Id": 2,
+        "AppId": 2,
+        "GroupId": 7,
+        "Name": "fcm.test+default",
+        "CreateAt": 1625508015,
+        "Role": 1,
+        "Configs": null
+      }
+    ]
+  },
+  "Configs": [
+    {
+      "Id": 2,
+      "NamespaceId": 2,
+      "Name": "AppOptions:Name",
+      "Data": "FCM",
+      "CreateAt": 1625508305,
+      "ValidType": 1
+    }
+  ]
+}
+// GET http://localhost:8080/client/config?appname=fcm.test
+// HTTP/1.1 200 OK
+// Content-Type: application/json; charset=utf-8
+// Date: Mon, 05 Jul 2021 18:07:22 GMT
+// Content-Length: 297
+// Request duration: 0.220706s
+#+END_SRC
+    
+
