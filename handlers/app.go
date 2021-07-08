@@ -5,7 +5,51 @@ import (
 
 	"github.com/Atlantis-Org/fcm/models"
 	"github.com/Atlantis-Org/fcm/utils"
+	"gorm.io/gorm"
 )
+
+func GetAppPages(pageNumber, pageSize int) (error, utils.Paged) {
+	if pageNumber <= 0 {
+		pageNumber = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+
+	paged := utils.Paged{
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+	}
+
+	var apps []models.App
+	offest := (paged.PageNumber - 1) * 20
+	err := utils.Db.Model(&models.App{}).Order("create_at desc").Limit(pageSize).Offset(offest).Find(&apps).Error
+	paged.List = apps
+	if err == gorm.ErrRecordNotFound {
+		return nil, paged
+	}
+	if err != nil {
+		return err, paged
+	}
+
+	err = utils.Db.Model(&models.App{}).Count(&paged.TotalRow).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, paged
+	}
+	if err != nil {
+		return err, paged
+	}
+	if paged.TotalRow == 0 {
+		return nil, paged
+	}
+
+	val := int(paged.TotalRow) % paged.PageSize
+	paged.TotalPage = int(paged.TotalRow) / paged.PageSize
+	if val != 0 {
+		paged.TotalPage += 1
+	}
+	return nil, paged
+}
 
 func CreateApp(app *models.App) error {
 	if app == nil {

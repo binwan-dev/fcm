@@ -2,11 +2,24 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Atlantis-Org/fcm/handlers"
 	"github.com/Atlantis-Org/fcm/models"
 	"github.com/gin-gonic/gin"
 )
+
+func GetAppPaged(c *gin.Context) {
+	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
+	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
+	err, paged := handlers.GetAppPages(pageNumber, pageSize)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, paged)
+}
 
 func CreateApp(c *gin.Context) {
 	var app models.App

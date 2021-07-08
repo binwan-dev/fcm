@@ -6,6 +6,7 @@ import (
 	"github.com/Atlantis-Org/fcm/controllers"
 	"github.com/Atlantis-Org/fcm/models"
 	"github.com/Atlantis-Org/fcm/utils"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,10 +21,17 @@ func main() {
 	models.DbMigrate()
 
 	r := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:8080"}
+	r.Use(cors.New(config))
+
 	r.GET("/client/config", controllers.GetClientConfig)
+	r.GET("/app", controllers.GetAppPaged)
 	r.POST("/app/create", controllers.CreateApp)
 	r.POST("/app/namespace/create", controllers.CreateAppNamespace)
 	r.POST("/app/config/create", controllers.CreateAppConfig)
 	r.POST("/group/create", controllers.CreateGroup)
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run("0.0.0.0:8081") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+
 }
