@@ -8,7 +8,37 @@ import (
 	"gorm.io/gorm"
 )
 
+func GetAppForId(appId int) (error, *models.App) {
+	var app models.App
+	err := utils.Db.Find(&app, appId).Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return nil, nil
+	}
+	if err != nil {
+		return err, nil
+	}
+	return nil, &app
+}
+
 func GetAppPages(pageNumber, pageSize int) (error, utils.Paged) {
+	var apps []models.App
+	db := utils.Db.Model(&models.App{}).Order("create_at desc")
+	return toPaged(pageNumber, pageSize, db, &apps)
+}
+
+func GetAppNamespacePages(pageNumber, pageSize, projectId int) (error, utils.Paged) {
+	var namespaces []models.AppNamespace
+	db := utils.Db.Model(&models.AppNamespace{}).Order("create_at desc")
+	return toPaged(pageNumber, pageSize, db, &namespaces)
+}
+
+func GetAppConfigPages(pageNumber, pageSize, namespaceId int) (error, utils.Paged) {
+	var appConfigs []models.AppConfigInfo
+	db := utils.Db.Model(&models.AppConfigInfo{}).Order("create_at desc")
+	return toPaged(pageNumber, pageSize, db, &appConfigs)
+}
+
+func toPaged(pageNumber, pageSize int, db *gorm.DB, data interface{}) (error, utils.Paged) {
 	if pageNumber <= 0 {
 		pageNumber = 1
 	}
@@ -21,10 +51,9 @@ func GetAppPages(pageNumber, pageSize int) (error, utils.Paged) {
 		PageSize:   pageSize,
 	}
 
-	var apps []models.App
 	offest := (paged.PageNumber - 1) * 20
-	err := utils.Db.Model(&models.App{}).Order("create_at desc").Limit(pageSize).Offset(offest).Find(&apps).Error
-	paged.List = apps
+	err := db.Limit(pageSize).Offset(offest).Find(data).Error
+	paged.List = data
 	if err == gorm.ErrRecordNotFound {
 		return nil, paged
 	}
@@ -32,7 +61,7 @@ func GetAppPages(pageNumber, pageSize int) (error, utils.Paged) {
 		return err, paged
 	}
 
-	err = utils.Db.Model(&models.App{}).Count(&paged.TotalRow).Error
+	err = db.Count(&paged.TotalRow).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, paged
 	}
@@ -49,6 +78,7 @@ func GetAppPages(pageNumber, pageSize int) (error, utils.Paged) {
 		paged.TotalPage += 1
 	}
 	return nil, paged
+
 }
 
 func CreateApp(app *models.App) error {
