@@ -63,6 +63,30 @@ func CreateAppNamespace(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func GetAppNamespacePaged(c *gin.Context) {
+	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
+	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
+	projectId, _ := strconv.Atoi(c.Query("projectId"))
+	err, paged := handlers.GetAppNamespacePages(pageNumber, pageSize, projectId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, paged)
+}
+
+func GetAppConfigs(c *gin.Context) {
+	namespaceId, _ := strconv.Atoi(c.Query("namespaceId"))
+	err, configs := handlers.GetAppConfigs(namespaceId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, configs)
+}
+
 func CreateAppConfig(c *gin.Context) {
 	var config models.AppConfigInfo
 	err := c.ShouldBindJSON(&config)
@@ -79,28 +103,18 @@ func CreateAppConfig(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetAppNamespacePaged(c *gin.Context) {
-	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
-	projectId, _ := strconv.Atoi(c.Query("projectId"))
-	err, paged := handlers.GetAppNamespacePages(pageNumber, pageSize, projectId)
+func ModifyAppConfig(c *gin.Context) {
+	var config models.AppConfigInfo
+	err := c.ShouldBindJSON(&config)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, paged)
-}
-
-func GetAppConfigPaged(c *gin.Context) {
-	pageNumber, _ := strconv.Atoi(c.Query("pageNumber"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize"))
-	namespaceId, _ := strconv.Atoi(c.Query("namespaceId"))
-	err, paged := handlers.GetAppNamespacePages(pageNumber, pageSize, namespaceId)
+	err = handlers.ModifyAppConfig(&config)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	c.JSON(http.StatusOK, paged)
+	c.Status(http.StatusOK)
 }

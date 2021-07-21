@@ -32,10 +32,13 @@ func GetAppNamespacePages(pageNumber, pageSize, projectId int) (error, utils.Pag
 	return toPaged(pageNumber, pageSize, db, &namespaces)
 }
 
-func GetAppConfigPages(pageNumber, pageSize, namespaceId int) (error, utils.Paged) {
+func GetAppConfigs(namespaceId int) (error, []models.AppConfigInfo) {
 	var appConfigs []models.AppConfigInfo
-	db := utils.Db.Model(&models.AppConfigInfo{}).Order("create_at desc")
-	return toPaged(pageNumber, pageSize, db, &appConfigs)
+	err := utils.Db.Where("namespace_id = ?", namespaceId).Order("sort asc").Find(&appConfigs).Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return nil, appConfigs
+	}
+	return err, appConfigs
 }
 
 func toPaged(pageNumber, pageSize int, db *gorm.DB, data interface{}) (error, utils.Paged) {
@@ -127,4 +130,29 @@ func CreateAppConfig(config *models.AppConfigInfo) error {
 	config.CreateAt = time.Now().Unix()
 
 	return utils.Db.Model(&models.AppConfigInfo{}).Create(config).Error
+}
+
+func ModifyAppConfig(config *models.AppConfigInfo) error {
+	if config == nil {
+		return utils.ErrParameterInvalid
+	}
+
+	var oldAppConfigInfo models.AppConfigInfo
+	err := utils.Db.Find(&oldAppConfigInfo, config.Id).Error
+	if err != nil && err == gorm.ErrRecordNotFound {
+		return utils.ErrNoExisted
+	}
+
+	result := utils.Db.Model(&oldAppConfigInfo).Updates(&models.AppConfigInfo{
+		Data:      config.Data,
+		ValidType: config.ValidType,
+		UpdateAt:  time.Now().Unix(),
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return utils.ErrFaild
+	}
+	return nil
 }

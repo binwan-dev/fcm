@@ -33,8 +33,9 @@ func main() {
 	r.POST("/app/namespace/create", controllers.CreateAppNamespace)
 
 	r.GET("/app/namespace", controllers.GetAppNamespacePaged)
-	r.GET("/app/config", controllers.GetAppConfigPaged)
-	r.POST("/app/config/create", controllers.CreateAppConfig)
+	r.GET("/app/namespace/config", controllers.GetAppConfigs)
+	r.POST("/app/namespace/config", controllers.CreateAppConfig)
+	r.PUT("/app/namespace/config", controllers.ModifyAppConfig)
 	r.POST("/group/create", controllers.CreateGroup)
 	r.Run("0.0.0.0:8081") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
