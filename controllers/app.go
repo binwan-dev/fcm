@@ -118,3 +118,14 @@ func ModifyAppConfig(c *gin.Context) {
 	}
 	c.Status(http.StatusOK)
 }
+
+func DeleteAppConfig(c *gin.Context) {
+	configId, _ := strconv.Atoi(c.Query("id"))
+	err := handlers.DeleteAppConfig(configId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}

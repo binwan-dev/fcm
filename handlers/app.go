@@ -156,3 +156,7 @@ func ModifyAppConfig(config *models.AppConfigInfo) error {
 	}
 	return nil
 }
+
+func DeleteAppConfig(configId int) error {
+	return utils.Db.Delete(&models.AppConfigInfo{}, configId).Error
+}
