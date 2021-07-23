@@ -7,5 +7,7 @@ type AppNamespace struct {
 	Name     string
 	CreateAt int64
 	Role     Role
+	IsRefer  bool
+	ReferId  int
 	Configs  []AppConfigInfo `gorm:"-"`
 }
